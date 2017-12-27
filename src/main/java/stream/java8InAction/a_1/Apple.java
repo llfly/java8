@@ -4,7 +4,7 @@ package stream.java8InAction.a_1;
  * Created by fangyou on 2017/12/14.
  */
 public class Apple {
-    private int weight;
+    private Integer weight;
     private String color;
 
     Apple(int weight, String color) {
@@ -12,11 +12,11 @@ public class Apple {
         this.color = color;
     }
 
-    public int getWeight() {
+    public Integer getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(Integer weight) {
         this.weight = weight;
     }
 
@@ -37,7 +37,6 @@ public class Apple {
     }
 
     public int sort(){
-        //return
         return 1;
     }
 }
