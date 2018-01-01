@@ -42,9 +42,5 @@ public class StreamTest {
                 .filter(d -> d.getWeight() < 150)
                 .map(Apple::getColor)
                 .collect(Collectors.toList());
-
     }
-
-
-
 }
