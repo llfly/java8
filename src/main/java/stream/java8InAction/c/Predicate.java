@@ -1,4 +1,4 @@
-package stream.java8InAction.c_1;
+package stream.java8InAction.c;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 public interface Predicate<T> {
     boolean test(T t);
 
-    public static <T> List<T> filter(List<T> list, stream.java8InAction.a_1.Predicate<T> p) {
+    public static <T> List<T> filter(List<T> list, stream.java8InAction.a.Predicate<T> p) {
         List <T> results = new ArrayList<>();
         for (T s: list) {
             if (p.test(s)) {

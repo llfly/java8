@@ -1,4 +1,4 @@
-package stream.java8InAction.a_1;
+package stream.java8InAction.a;
 
 import java.util.ArrayList;
 import java.util.List;

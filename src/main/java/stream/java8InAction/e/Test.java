@@ -1,4 +1,4 @@
-package stream.java8InAction.e_1;
+package stream.java8InAction.e;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

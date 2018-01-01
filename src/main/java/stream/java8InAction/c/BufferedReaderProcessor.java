@@ -1,4 +1,4 @@
-package stream.java8InAction.c_1;
+package stream.java8InAction.c;
 
 import java.io.BufferedReader;
 import java.io.IOException;

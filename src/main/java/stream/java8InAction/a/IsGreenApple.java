@@ -1,4 +1,4 @@
-package stream.java8InAction.a_1;
+package stream.java8InAction.a;
 
 /**
  * Created by fangyou on 2017/12/14.

@@ -1,7 +1,4 @@
-package stream.java8InAction.a_1;
-
-import java.util.ArrayList;
-import java.util.List;
+package stream.java8InAction.a;
 
 /**
  * Created by fangyou on 2017/12/14.

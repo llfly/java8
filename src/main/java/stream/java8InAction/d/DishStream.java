@@ -1,4 +1,4 @@
-package stream.java8InAction.d_1;
+package stream.java8InAction.d;
 
 import java.util.Arrays;
 import java.util.List;

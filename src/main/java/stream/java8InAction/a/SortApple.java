@@ -1,4 +1,4 @@
-package stream.java8InAction.a_1;
+package stream.java8InAction.a;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by fangyou on 2017/12/14.

@@ -1,6 +1,6 @@
-package stream.java8InAction.d_1;
+package stream.java8InAction.d;
 
-import stream.java8InAction.a_1.Apple;
+import stream.java8InAction.a.Apple;
 
 import java.util.ArrayList;
 import java.util.Collections;
