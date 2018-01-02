@@ -31,10 +31,10 @@ public class SpliteratorTest {
         Stream<Character> stream = IntStream.range(0, s.length())
                 .mapToObj(s::charAt);
 
-        return countWrods(stream);
+        return countWords(stream);
     }
 
-    private static int countWrods(Stream<Character> stream) {
+    private static int countWords(Stream<Character> stream) {
         WordCounter wordCounter = stream.reduce(new WordCounter(0, true),
                 WordCounter::accumulate,
                 WordCounter::combine);
@@ -45,7 +45,7 @@ public class SpliteratorTest {
     public static int countWords(String s){
         Spliterator<Character> spliterator = new WordCounterSpliterator(s);
         Stream<Character> stream = StreamSupport.stream(spliterator, true);
-        return countWrods(stream);
+        return countWords(stream);
     }
 
 

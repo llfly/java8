@@ -1,5 +1,4 @@
 package stream.java8InAction.g;
-import java.util.concurrent.atomic.LongAccumulator;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -7,23 +6,38 @@ import java.util.stream.Stream;
 /**
  * Created by ll on 2018/1/1.
  */
-public class ParallelTest {
-    public void test1(){
-        // 并行流：把一个内容分成多个数据块，并用不同的线程分别处理每个数据块的流
+public class ParallelTest{
+    public static void main(String [] args) {
+        final long n = 100_000;
 
-    }
-    public static long getSum(long n) {
-        return Stream.iterate(1L, i -> i + 1)
-                .limit(n)
-                .reduce(0L, Long::sum);
+        log("iterativeSum", measureSumPref(ParallelTest::iterativeSum, n));
+        log("parallelSum", measureSumPref(ParallelTest::parallelSum, n));
+        log("getSum", measureSumPref(ParallelTest::getSum, n));
+        // log("sequentialSum", measureSumPref(ParallelTest::sequentialSum,n));
+        log("rangedSum", measureSumPref(ParallelTest::rangedSum, n));
+
+        // 正确的使用并行流
+        log("sideEffectSum", sideEffectSum(100));
     }
 
+    public static void log(String name, Long val) {
+        System.out.println("name: " + name + " val:" + val);
+    }
+
+    // 传统方式
     public static long iterativeSum(long n) {
         long result = 0;
         for (long i = 1L; i <=n; i++) {
             result += i;
         }
         return result;
+    }
+
+    // 函数式
+    public static long getSum(long n) {
+        return Stream.iterate(1L, i -> i + 1)
+                .limit(n)
+                .reduce(0L, Long::sum);
     }
 
     // 将流转为并行流
@@ -42,8 +56,10 @@ public class ParallelTest {
                 .reduce(0L, Long::sum);
     }
 
+    // sequential 和 parallel 切换
     public static long sequentialSum(long n) {
         return Stream.iterate(1L, i -> i + 1)
+                .limit(n)
                 .filter(i -> i / 2 == 0)
                 .sequential()   // 对并行流使用 sequential 方法就可以变成顺序流
                 .map(i -> i * 2 )
@@ -52,13 +68,14 @@ public class ParallelTest {
 
     }
 
-    public long measureSumPref(Function<Long, Long> adder, long n) {
+    // 效率评估
+    public static long measureSumPref(Function<Long, Long> adder, long n) {
         long fastest = Long.MAX_VALUE;
         for (int i = 0;i < 10;i ++) {
             long start = System.nanoTime();
             long sum = adder.apply(n);
             long duration = (System.nanoTime() - start) / 1_000_000;
-            System.out.println("Result:" + sum);
+            // System.out.println(adder.getClass().getName() + " Result:" + + sum);
             if ( duration < fastest ) fastest = duration;
         }
         return fastest;
@@ -75,7 +92,6 @@ public class ParallelTest {
                 .reduce(0L, Long::sum);
     }
 
-
     // 正确使用并行流
     // 本质上是有序的，每次访问 total 都会出现数据竞争
     public static long sideEffectSum(long n) {
@@ -85,7 +101,6 @@ public class ParallelTest {
                 .forEach(accumulator::add);
         return accumulator.total;
     }
-
 
     // 如何高效使用并行流
     // 1. 如有疑问，测量，顺序流还是并行流，最重要的建议就是用适当的基准来检查其性能
@@ -100,6 +115,7 @@ public class ParallelTest {
     // 可分解性 极佳          差           极佳                  差           好       好
 
 }
+
 class Accmulator{
     public long total = 0;
     public void add (long value) {

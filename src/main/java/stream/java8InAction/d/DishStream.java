@@ -1,9 +1,10 @@
 package stream.java8InAction.d;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * Created by fangyou on 2017/12/27.
@@ -99,42 +100,141 @@ public class DishStream {
                 menu.stream()
                         .filter(Dish::isVegetarian)
                         .findAny();
-
-        menu.stream()
-                .filter(Dish::isVegetarian)
-                .findAny()
-                .ifPresent(d -> System.out.println(d.getName()));
     }
 
+    public void testCollect(){
+        Comparator<Dish> dishComparartor = Comparator.comparing(Dish::getCalories);
 
-    public void reduceTest(){
-        // 归约
-        List <Integer> numbers = Arrays.asList(1,2,3,4);
-        int sum = numbers.stream().reduce(0, (a, b) -> a + b);
-        int sum2 = numbers.stream().reduce(0, Integer::sum);
-        Optional<Integer> sum3 = numbers.stream().reduce(Integer::sum);
+        Optional <Dish> mostCalorieDish = menu.stream().collect(maxBy(dishComparartor));
 
-        Optional<Integer> max = numbers.stream().reduce(Integer::max);
-
-        int count = numbers.stream()
-                .map(d -> 1)
-                .reduce(0, Integer::sum);
-
-        long count2 = numbers.stream().count();
-
-        // stream 和 parallelStream
-
-        // 要并行执行这段代码也要付一定代价
-        // 传递给 reduce的 Lambda 不能更改状态(如实例变量)，而且操作必须满足结合律才可以按任意顺序执行
-        int count3 = numbers.parallelStream().reduce(0, Integer::sum);
+        // 汇总
+        // summingInt summingLong summingDouble
+        int totalCalories = menu.stream().collect(summingInt(Dish::getCalories));
 
 
+        double avgCalories = menu.stream().collect(averagingInt(Dish::getCalories));
+
+        IntSummaryStatistics menuStatistics = menu.stream().collect(summarizingInt(Dish::getCalories));
+
+        // 连接字符串
+
+        String shortMenu = menu.stream().map(Dish::getName).collect(joining(", "));
 
 
+        // Collectors.reducing
+        int totalCalories2 = menu.stream().collect(reducing(0, // 初始值
+                Dish::getCalories, // 转换函数
+                (i, j) -> i + j));  // 累积函数
+
+        Optional<Dish> mostCalorieDish2 = menu.stream().collect(reducing((d1, d2) -> d1.getCalories() > d2.getCalories() ? d1 : d2));
 
 
+        // reduce   toListCollector
+        // 语义问题：reduce 方法旨在把两个值结合起来生成一个新值，它是一个不可变的规约
+        // 实际问题：不能并行工作，因为多线程并发修改同一个数据结构会破坏 List 本身
+        Stream<Integer> stream = Arrays.asList(1,2,3,4,5,6).stream();
+        List <Integer> numbers = stream.reduce(
+                new ArrayList<Integer>(),
+                (List <Integer> l, Integer e) -> {
+                    l.add(e);
+                    return l;
+                },
+                (List <Integer> l1, List<Integer> l2) -> {
+                    l1.addAll(l2);
+                    return l1;
+                }
+        );
+
+        int totalCalories3 = menu.stream().map(Dish::getCalories).reduce(Integer::sum).get();
     }
+
+    public void testGroupingBy(){
+        Map<Dish.Type, List <Dish>> dishesByType = menu.stream().collect(groupingBy(Dish::getType));
+
+        Map<CaloricLevel, List<Dish>> dishesByCaloricLevel = menu.stream().collect(
+                groupingBy(dish -> {
+                    if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                    else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                    else return CaloricLevel.FAT;
+                })
+        );
+
+        // 多级分组
+        Map <Dish.Type, Map<CaloricLevel, List<Dish>>> dishesByTypeCaloricLevel = menu.stream().collect(
+                groupingBy(Dish::getType,
+                        groupingBy(dish -> {
+                            if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                            else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                            else return CaloricLevel.FAT;
+                        })
+                )
+        );
+
+
+        Map<Dish.Type, Long> typesCount = menu.stream().collect(
+                groupingBy(Dish::getType, counting())
+        );
+
+
+        // 将收集器的结果转换为另一个类型
+        Map<Dish.Type, Dish> mostCaloricByType = menu.stream().collect(
+                groupingBy(Dish::getType, // 分类函数
+                        collectingAndThen(maxBy(Comparator.comparingInt(Dish::getCalories)) , // 包装后的收集器
+                                Optional::get)
+        ));
+
+
+        Map<Dish.Type, Set<CaloricLevel>> caloricLevelsByType = menu.stream().collect(
+                groupingBy(Dish::getType, mapping(
+                        dish -> {
+                            if (dish.getCalories() <= 400) return CaloricLevel.DIET;
+                            else if (dish.getCalories() <= 700) return CaloricLevel.NORMAL;
+                            else return CaloricLevel.FAT;
+                        },
+                        toCollection(HashSet::new)
+                ))
+        );
+
+        // 分区  partitioningBy
+        Map<Boolean, List<Dish>> partitionedMenu = menu.stream().collect(
+                partitioningBy(Dish::isVegetarian)
+        );
+        
+    }
+
+    public enum CaloricLevel {DIET, NORMAL, FAT}
 
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -23,6 +23,10 @@ public class Forkjoin {
         return new ForkJoinPool().invoke(task);
     }
 
+    public static void main(String [] args) {
+        System.out.println(forkJoinSum(100));
+    }
+
 
     // 使用 分支／合并框架 最佳做法
     // 1. 对一个任务调用 join 方法会阻塞调用方，直到该任务做出结果
