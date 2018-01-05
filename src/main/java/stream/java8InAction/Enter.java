@@ -5,6 +5,10 @@ package stream.java8InAction;
  */
 
 public class Enter {
+
+
+
+
     public static void main(String [] args) {
 
     }
