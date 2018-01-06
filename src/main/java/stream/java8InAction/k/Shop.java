@@ -18,8 +18,11 @@ public class Shop {
         this.name = name;
     }
 
-    public double getPrice(String product) {
-        return calculatePrice(product);
+    public String getPrice(String product) {
+
+        double price =  calculatePrice(product);
+        Discount.Code code = Discount.Code.values()[new Random().nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
     }
 
     public static void delay(){
@@ -30,6 +33,24 @@ public class Shop {
             throw new RuntimeException(e);
         }
     }
+
+    private static final Random random = new Random();
+    public static void randomDelay(){
+        int delay = 500 + random.nextInt(2000);
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getRandomPrice(String product) {
+        randomDelay();
+        double price =  new Random().nextDouble() * product.charAt(0) + product.charAt(1);
+        Discount.Code code = Discount.Code.values()[new Random().nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
+    }
+
 
     private double calculatePrice(String product) {
         delay();

@@ -13,11 +13,13 @@ import static java.util.stream.Collectors.toList;
  */
 public class TestShop {
     public static void main(String[] args) {
-        //testShop();
-        //testAsyncShop();
+//        testShop();
+//        testAsyncShop();
+
         testListShop();
         testListShopParallel();
         testFindPricesAsync();
+        testFindPricesThread();
     }
 
     public static void testAsyncShop() {
@@ -43,22 +45,32 @@ public class TestShop {
     public static void testShop() {
         Shop shop = new Shop("test");
         long start = System.nanoTime();
-        Double futurePrice = shop.getPrice("my favorite product");
+        String futurePrice = shop.getPrice("my favorite product");
         long invocationTime = ((System.nanoTime() - start) / 1_000_000);
         System.out.println("Invocation returned after " + invocationTime + " msecs");
     }
 
-    final static List<Shop> shops = Arrays.asList(new Shop("abc"), new Shop("def"), new Shop("ghi"), new Shop("zzz"));
+    final static List<Shop> shops = Arrays.asList(
+            new Shop("abc"),
+            new Shop("def"),
+            new Shop("ghi"),
+            new Shop("zzz"),
+            new Shop("asf"),
+            new Shop("ccc"),
+            new Shop("ccc"),
+            new Shop("ccc"),
+            new Shop("ccc"),
+            new Shop("ccc"));
 
     public static List<String> findPrices(String product) {
         return shops.stream()
-                .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
+                .map(shop -> String.format("%s price is %s", shop.getName(), shop.getPrice(product)))
                 .collect(toList());
     }
 
     public static List<String> findPricesParallel(String product) {
         return shops.parallelStream()
-                .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice(product)))
+                .map(shop -> String.format("%s price is %s", shop.getName(), shop.getPrice(product)))
                 .collect(toList());
     }
 
@@ -86,7 +98,7 @@ public class TestShop {
     // W / C 是等待时间于计算时间的比率
 
 
-    private final Executor executor = Executors.newFixedThreadPool(Math.min(shops.size(), 100), // 创建一个线程池
+    private static final Executor executor = Executors.newFixedThreadPool(Math.min(shops.size(), 100), // 创建一个线程池
             new ThreadFactory(){
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r);
@@ -94,6 +106,18 @@ public class TestShop {
             return t;
         }
     });
+
+
+    public static List<String> findPricesThread(String product) {
+        List<CompletableFuture<String>> priceFutures =
+                shops.stream().map(shop -> CompletableFuture.supplyAsync(
+                        () -> shop.getName() +  " price is " + shop.getPrice(product), executor))
+                .collect(Collectors.toList());
+
+        return priceFutures.stream()
+                .map(CompletableFuture::join)
+                .collect(toList());
+    }
 
 
 
@@ -117,4 +141,19 @@ public class TestShop {
         long duration = (System.nanoTime() - start) / 1_000_000;
         System.out.println("Done in " + duration + " msecs");
     }
+
+    public static void testFindPricesThread() {
+        long start = System.nanoTime();
+        System.out.println(findPricesThread("myPhone27S"));
+        long duration = (System.nanoTime() - start) / 1_000_000;
+        System.out.println("Done in " + duration + " msecs");
+    }
+
+
+    // 并行  使用流 还是 CompletableFutures
+    // 对集合进行并行计算有两种方式：  并行流 利用 map   ／ 枚举每一个元素，创建新的线程，在 CompleteableFuture 内进行操作
+    // 后者提供更多灵活性，可以调整线程池的大小，确保整体计算不会因为线程都在等待I／O而发生阻塞
+
+    // 计算密集型操作没有I／O 推荐Stream接口，实现简单，效率最高
+    // 涉及等待I／O等操作，使用 CompletableFuture 灵活性更好，处理流的流水线中如果发生了I／O等待，流的延迟特性会让我们很难判断到底什么时候触发了等待
 }
