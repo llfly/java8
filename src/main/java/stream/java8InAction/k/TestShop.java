@@ -3,8 +3,7 @@ package stream.java8InAction.k;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -79,6 +78,23 @@ public class TestShop {
         // 这种方式和并行流内部采用的是同样的通用线程池，默认都使用固定数目的线程，具体线程数取决于Runtime. getRuntime().availableProcessors()的返回值。
         // 然而，CompletableFuture具有一定的优势，因为它允许你对执行器(Executor)进行配置，尤其是线程池的大小，让它以更适合应用需求的方式进行配置，满足程序的要求，而这是并行流API无法提供的。
     }
+
+    // 使用定制的执行器
+    // N(threads) = N(cpu) * U(cpu) * (1 + W / C)
+    // N(cpu) 处理器的核的数目，可以通过 Runtime.getRuntime().availableProcessors() 得到
+    // U(cpu) 期望的 CPU 利用率（该值应该介于 0 和 1 之间）
+    // W / C 是等待时间于计算时间的比率
+
+
+    private final Executor executor = Executors.newFixedThreadPool(Math.min(shops.size(), 100), // 创建一个线程池
+            new ThreadFactory(){
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setDaemon(true); // 使用守护线程，这种方式不会阻止程序的关停
+            return t;
+        }
+    });
+
 
 
     public static void testListShop() {
