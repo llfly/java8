@@ -122,7 +122,7 @@ public class TestDiscount {
         // CompletableFuture.allOf(futures).join();
 
         // anyOf 只需要一个
-        CompletableFuture.anyOf(futures).join();
+        // CompletableFuture.anyOf(futures).join();
 
         System.out.println("All shops have now responded in "
                 + ((System.nanoTime() - start) / 1_000_000) + " msecs");
