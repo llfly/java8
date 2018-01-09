@@ -2,7 +2,6 @@ package stream.java8InAction.k;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
